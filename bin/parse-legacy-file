@@ -17,68 +17,8 @@ PLUGIN_DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
 # shellcheck source=lib/shared.sh
 . "$PLUGIN_DIR/../lib/shared.sh"
 
-CACHE_DIR=/tmp/asdf-xcode.cache
-XCODERELEASES_PATH="${CACHE_DIR}/xcodereleases-data.json"
-XCODERELEASES_URL="https://xcodereleases.com/data.json"
-mkdir -p $CACHE_DIR
-
 TEMP_DIR=$(/usr/bin/mktemp -dt asdf-xcode)
 trap 'rm -rf ${TEMP_DIR}' EXIT
-
-function assert_darwin() {
-    [ "$(uname -s)" = Darwin ] || {
-        echo "This plugin only works on macOS. Aborting."
-        exit 1
-    }
-}
-
-function assert_jq_installed() {
-    [ -x "$(command -v jq)" ] || {
-        echo "Install $(tput bold)jq$(tput sgr0) to continue. Aborting." >&2
-        exit 1
-    }
-}
-
-function cache_is_out_of_date() {
-    [ -z "$(ls -A ${CACHE_DIR})" ] || [ "$(set -- "$(stat -f %c ${CACHE_DIR}/*)" && echo "$1")" -le $(($(date +%s) - 3600)) ]
-}
-
-function fetch_xcodereleases_data_if_needed() {
-    if ! cache_is_out_of_date; then
-        return 0
-    fi
-    curl \
-        --silent \
-        --location \
-        --write-out "%{filename_effective}\n" \
-        -o "$XCODERELEASES_PATH" \
-        "$XCODERELEASES_URL"
-}
-
-function xcodereleases_json() {
-    jq '.' "$XCODERELEASES_PATH"
-}
-
-function get_apple_cookie() {
-    echo ""
-}
-
-function download_xcode() {
-    local url="$1"
-    local cookie
-    cookie=$(get_apple_cookie)
-
-    cd "$TEMP_DIR"
-
-    curl \
-        --silent \
-        --location \
-        --cookie "$cookie" \
-        --progress-bar \
-        --continue \
-        --remote-name \
-        "$url"
-}
 
 # Commands
 
@@ -90,8 +30,7 @@ function download_xcode() {
 # versions will be off screen. If versions are being pulled from releases page
 # on a website it’s recommended to not sort the versions if at all possible.
 function list-all() {
-    assert_darwin && assert_jq_installed
-    fetch_xcodereleases_data_if_needed
+    load_environment
     xcodereleases_json | jq --raw-output '.[] | .version.build' | tac | tr '\n' ' '
 }
 
@@ -108,8 +47,7 @@ function list-all() {
 # process other asdf commands run in other terminals during the installation may
 # consider that version of the tool installed, even when it is not fully installed.
 function install() {
-    assert_darwin && assert_jq_installed
-    fetch_xcodereleases_data_if_needed
+    load_environment
 
     local download_url
     local xip_name
@@ -118,7 +56,7 @@ function install() {
     xip_name=$(basename "$download_url")
     xip_path="$TEMP_DIR/$xip_name"
 
-    download_xcode "$download_url"
+    download_xcode "$download_url" "$TEMP_DIR"
 
     local install_dir="$ASDF_INSTALL_PATH/$ASDF_INSTALL_VERSION"
     (mkdir -p "$install_dir" &&
@@ -175,6 +113,7 @@ function parse-legacy-file() {
     echo ".xcode-version"
 }
 
+# Main
 # Case block to handle hard links in the plugin bin directory
 
 case $(basename "$0") in
