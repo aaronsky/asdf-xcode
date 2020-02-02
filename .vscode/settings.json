@@ -1,0 +1,11 @@
+{
+  "shellcheck.customArgs": ["-x"],
+  "shellcheck.useWorkspaceRootAsCwd": true,
+  "files.exclude": {
+    "bin/install": true,
+    "bin/uninstall": true,
+    "bin/exec-{env,path}": true,
+    "bin/list-{all,bin-paths,legacy-filenames}": true,
+    "bin/parse-legacy-file": true
+  }
+}
