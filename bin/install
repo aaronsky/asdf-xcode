@@ -58,8 +58,8 @@ function install() {
 
     download_xcode "$download_url" "$TEMP_DIR"
 
-    (mkdir -p "$(install_path)" &&
-        cd "$(install_path)" &&
+    (mkdir -p "$ASDF_INSTALL_PATH" &&
+        cd "$ASDF_INSTALL_PATH" &&
         xip --extract "$xip_path")
 
     sudo xcode-select --switch "$(installed_xcode_path)"

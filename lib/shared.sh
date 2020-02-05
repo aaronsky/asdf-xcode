@@ -20,12 +20,8 @@ function assert_jq_installed() {
     }
 }
 
-function install_path() {
-    echo "$ASDF_INSTALL_PATH/$ASDF_INSTALL_VERSION"
-}
-
 function installed_xcode_path() {
-    echo "$(install_path)"/Xcode*.app/Contents/Developer
+    echo "$ASDF_INSTALL_PATH"/Xcode*.app/Contents/Developer
 }
 
 function cache_is_out_of_date() {
