@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-PLUGIN_DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd)"
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 # shellcheck source=lib/shared.sh
 . "$PLUGIN_DIR/../lib/shared.sh"
 
@@ -58,12 +58,11 @@ function install() {
 
     download_xcode "$download_url" "$TEMP_DIR"
 
-    local install_dir="$ASDF_INSTALL_PATH/$ASDF_INSTALL_VERSION"
-    (mkdir -p "$install_dir" &&
-        cd "$install_dir" &&
+    (mkdir -p "$(install_path)" &&
+        cd "$(install_path)" &&
         xip --extract "$xip_path")
 
-    sudo xcode-select --switch "$install_dir"
+    sudo xcode-select --switch "$(installed_xcode_path)"
 
     xcodebuild -runFirstLaunch
 }
@@ -80,7 +79,7 @@ function list-bin-paths() {
 
 # exec-env sets up the env to run the binaries in the package.
 function exec-env() {
-    :
+    xcrun xcode-select --switch "$(installed_xcode_path)"
 }
 
 # exec-path gets the executable path for the specified version of the tool. Must
@@ -88,7 +87,11 @@ function exec-env() {
 # conditionally override the shim’s specified executable path, otherwise return
 # the default path specified by the shim.
 function exec-path() {
-    :
+    if xcode_path="$(xcrun xcode-select --print-path)"; then
+        echo "$xcode_path"
+    else
+        installed_xcode_path
+    fi
 }
 
 # uninstall uninstalls a specific version of a tool.
@@ -109,9 +112,9 @@ function list-legacy-filenames() {
 # asdf. If parse-legacy-file isn’t implemented, asdf will simply cat the
 # file to determine the version. The script will be passed the file path
 # as its first argument.
-function parse-legacy-file() {
-    echo ".xcode-version"
-}
+# function parse-legacy-file() {
+#     echo ".xcode-version"
+# }
 
 # Main
 # Case block to handle hard links in the plugin bin directory
@@ -138,7 +141,7 @@ uninstall)
 list-legacy-filenames)
     list-legacy-filenames
     ;;
-parse-legacy-file)
-    parse-legacy-file
-    ;;
+    # parse-legacy-file)
+    #     parse-legacy-file
+    #     ;;
 esac
