@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Run Shellcheck
-        run: shellcheck bin/*
+        run: shellcheck -x bin/*
 
   plugin-test:
     runs-on: macOS-latest

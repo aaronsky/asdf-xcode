@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # All scripts except bin/list-all will have access to the following env vars to act upon:
 #
 #     ASDF_INSTALL_TYPE - version or ref
@@ -31,7 +33,7 @@ trap 'rm -rf ${TEMP_DIR}' EXIT
 # on a website it’s recommended to not sort the versions if at all possible.
 function list-all() {
     load_environment
-    xcodereleases_json | jq --raw-output '.[] | .version.build' | tac | tr '\n' ' '
+    xcodereleases_json | jq --raw-output '.[] | .version.build' | tail -r | tr '\n' ' '
 }
 
 # install installs the version, in the path mentioned in ASDF_INSTALL_PATH. The
