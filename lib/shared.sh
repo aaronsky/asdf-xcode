@@ -36,6 +36,7 @@ function fetch_xcodereleases_data_if_needed() {
         --silent \
         --location \
         --write-out "%{filename_effective}\n" \
+        --cookie "$(get_cookie_jar)" \
         -o "$XCODERELEASES_PATH" \
         "$XCODERELEASES_URL"
 }
@@ -50,24 +51,22 @@ function load_environment() {
     fetch_xcodereleases_data_if_needed
 }
 
-function get_apple_cookie() {
-    echo ""
+function get_cookie_jar() {
+    echo "$CACHE_DIR/cookies.txt"
 }
 
 function download_xcode() {
     local url="$1"
     local output_dir="$2"
-    local cookie
-    cookie=$(get_apple_cookie)
 
     cd "$output_dir"
 
     curl \
-        --silent \
+        "$url" \
+        --header 'accept-encoding: gzip, deflate, br' \
+        --cookie "$(get_cookie_jar)" \
         --location \
-        --cookie "$cookie" \
         --progress-bar \
-        --continue \
-        --remote-name \
-        "$url"
+        --compressed \
+        --remote-name
 }

@@ -62,7 +62,7 @@ function install() {
 
     (mkdir -p "$ASDF_INSTALL_PATH" &&
         cd "$ASDF_INSTALL_PATH" &&
-        xip --extract "$xip_path")
+        xip --expand "$xip_path")
 
     sudo xcode-select --switch "$(installed_xcode_path)"
 
