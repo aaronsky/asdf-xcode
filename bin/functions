@@ -64,7 +64,7 @@ function install() {
         cd "$ASDF_INSTALL_PATH" &&
         xip --expand "$xip_path")
 
-    sudo xcode-select --switch "$(installed_xcode_path)"
+    exec-env
 
     xcodebuild -runFirstLaunch
 }
@@ -81,7 +81,8 @@ function list-bin-paths() {
 
 # exec-env sets up the env to run the binaries in the package.
 function exec-env() {
-    xcrun xcode-select --switch "$(installed_xcode_path)"
+    DEVELOPER_DIR="$ASDF_INSTALL_PATH"/Xcode*.app/Contents/Developer
+    export DEVELOPER_DIR
 }
 
 # exec-path gets the executable path for the specified version of the tool. Must
