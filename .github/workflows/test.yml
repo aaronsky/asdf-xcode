@@ -8,14 +8,12 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Run Shellcheck
-        run: shellcheck -x bin/*
+        run: shellcheck -x bin/* lib/*
 
   plugin-test:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: asdf-vm/actions/plugin-test@v1.0.0
+      - uses: asdf-vm/actions/plugin-test@v1
         with:
           command: "xcodebuild -version"
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
